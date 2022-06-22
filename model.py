@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import glob, os
 
 from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dropout, Dense, BatchNormalization, Flatten
 
 
 import logging
@@ -29,20 +30,35 @@ logger.setLevel(logging.ERROR)
 
 # Model
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(32, (3,3), activation='relu', padding='same', input_shape=(48,48,1)),
-    tf.keras.layers.MaxPooling2D(2,2),
-    tf.keras.layers.Conv2D(64, (3,3), activation='relu', padding='same'),
-    tf.keras.layers.MaxPooling2D(2,2),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(7, activation='softmax')
+    Conv2D(64, (3,3), activation='relu', padding='same', input_shape=(48,48,1)),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    
+    Conv2D(64, (3,3), activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    
+    Dropout(0.25),
+    
+    Conv2D(128, (3,3), activation='relu', padding='same'),
+    Conv2D(128, (3,3), activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    
+    Conv2D(256, (3,3), activation='relu', padding='same'),
+    Conv2D(256, (3,3), activation='relu', padding='same'),
+    BatchNormalization(),
+    MaxPooling2D(2,2),
+    
+    Flatten(),
+
+    Dense(1028, activation='relu'),
+    Dense(7, activation='softmax')
 ])
 
 model.compile(optimizer='adam',
              loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
              metrics=['accuracy'])
-
 
 # Preparing Data
 data = pd.read_csv("data\\fer2013.csv")
